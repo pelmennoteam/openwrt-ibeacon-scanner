@@ -1,0 +1,12 @@
+#!/bin/sh /etc/rc.common
+
+START=61
+
+start() {
+        service_start /usr/bin/ibeacon-ifup
+}
+
+stop() {
+        kill -SIGINT $(pidof hcitool) 2>/dev/null
+}
+
