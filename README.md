@@ -36,4 +36,4 @@ interface=hci0
 
 `interface` - интерфейс usb bluetooth устройства
 
-`device` - имя устройства (подставляется в тело запроса к `remote_addr`)
+`dev_id` - имя устройства (подставляется в тело запроса к `remote_addr` в поле `device`)
