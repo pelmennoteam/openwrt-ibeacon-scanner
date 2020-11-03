@@ -33,5 +33,7 @@ interface=hci0
 ```
 
 `remote_addr` - адрес ресурса на который будут отправляться данные (формат: `{"uuid": "", "major": "", "minor": "", "power": "", "rssi": "", "device": ""}`)
+
 `interface` - интерфейс usb bluetooth устройства
+
 `device` - имя устройства (подставляется в тело запроса к `remote_addr`)
