@@ -1,31 +1,26 @@
-#!/bin/sh
-
-interface=hci0
-source /etc/ibeacon.conf
-
-hciconfig $interface up
-hcitool lescan --duplicates >/dev/null &
-
-root@OpenWrt:~# cat /usr/bin/ibeacon-scan 
-#!/bin/sh
+#!/bin/bash
 
 process_complete_packet() {
   local packet=${1//[\ |>]/}
-  if [ $(echo -n "$packet" | grep -c -E "^043E2A0201.{18}0201.{10}0215") -eq 0 ]; then
+  # if [ $(echo -n "$packet" | grep -c -E "^043E2A0201.{18}0201.{10}0215") -eq 0 ]; then
+  if [[ ! "$packet" =~ ^043E2A0201.{18}0201.{10}0215 ]]; then
     return
   fi
 
   uuid="${packet:46:8}-${packet:54:4}-${packet:58:4}-${packet:62:4}-${packet:66:12}"
   major=$((0x${packet:78:4}))
   minor=$((0x${packet:82:4}))
-  power=$(($((0x${packet:86:2})) - 256))
-  rssi=$(($((0x${packet:88:2})) - 256))
+  power=$[$((0x${packet:86:2})) - 256]
+  rssi=$[$((0x${packet:88:2})) - 256]
 
   if [ "$remote_addr" ]; then
-    wget \
-      --post-data='{"uuid": "'$uuid'", "major": "'$major'", "minor": "'$minor'", "power": "'$power'", "rssi": "'$rssi'", "device": "'$dev_id'"}' \
-      -q \
-      -O /dev/null \
+    curl \
+      -H "Content-Type: application/json" \
+      -X POST \
+      -d '{"uuid": "'$uuid'", "major": "'$major'", "minor": "'$minor'", "power": "'$power'", "rssi": "'$rssi'", "device": "'$dev_id'"}' \
+      -s \
+      -f \
+      -o /dev/null \
       "$remote_addr"
   else
     echo -e "$uuid\t$major\t$minor\t$power\t$rssi"
@@ -35,7 +30,8 @@ process_complete_packet() {
 read_blescan_packet_dump() {
   packet=""
   while read line; do
-    if [ $(echo -n "$line" | grep -c -E "^>") -eq 1 ]; then
+    # if [ $(echo -n "$line" | grep -c -E "^>") -eq 1 ]; then
+    if [[ "$line" =~ ^\> ]]; then
       if [ "$packet" ]; then
         process_complete_packet "$packet"
       fi
@@ -51,4 +47,3 @@ dev_id="$(cat /sys/class/net/wlan0/address)"
 source /etc/ibeacon.conf
 
 hcidump --raw | read_blescan_packet_dump &
-

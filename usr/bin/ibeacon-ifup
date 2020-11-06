@@ -1,8 +1,7 @@
-#!/bin/sh
+#!/bin/bash
 
 interface=hci0
 source /etc/ibeacon.conf
 
 hciconfig $interface up
 hcitool lescan --duplicates >/dev/null &
-
