@@ -43,7 +43,7 @@ read_blescan_packet_dump() {
 }
 
 remote_addr=""
-dev_id="$(cat /sys/class/net/wlan0/address)"
+dev_id="$(cat /sys/class/net/eth0/address)"
 source /etc/ibeacon.conf
 
 hcidump --raw | read_blescan_packet_dump &
